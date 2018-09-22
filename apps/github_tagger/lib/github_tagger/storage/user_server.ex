@@ -48,7 +48,7 @@ defmodule GithubTagger.Storage.UserServer do
 
     if :ets.insert(table, {user, updated_repos}),
       do: {:ok, repo},
-      else: {:error, "fail to instert repositorie"}
+      else: {:error, "fail to insert repository"}
   end
 
   defp get_storaged_repos(user, table) do

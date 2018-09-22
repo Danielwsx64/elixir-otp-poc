@@ -41,6 +41,24 @@ defmodule GithubTagger.Storage.UserServerTest do
       assert {:ok, raw_repo} == UserServer.store({user, repo_one}, pid)
       assert {:ok, _} = UserServer.store({user, repo_two}, pid)
     end
+
+    test "return error when try add existing repository" do
+      # TODO
+      user = "daniel"
+
+      repo = %Repository{
+        id: 1,
+        name: "awesome_app",
+        description: "awesome_app repo",
+        url: "http://github/daniel/awesome_app",
+        language: "elixir"
+      }
+
+      {:ok, pid} = UserServer.start_link()
+
+      UserServer.store({user, repo}, pid)
+      # assert {:error, "fail to insert repository"} = UserServer.store({user, repo}, pid)
+    end
   end
 
   describe "lookup/1" do
