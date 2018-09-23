@@ -8,6 +8,7 @@ defmodule GithubTaggerWeb.Application do
     children = [
       # Start the endpoint when the application starts
       supervisor(GithubTaggerWeb.Endpoint, []),
+      supervisor(GithubTagger.Storage.UserServer, [])
       # Start your own worker by calling: GithubTaggerWeb.Worker.start_link(arg1, arg2, arg3)
       # worker(GithubTaggerWeb.Worker, [arg1, arg2, arg3]),
     ]

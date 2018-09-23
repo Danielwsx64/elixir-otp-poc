@@ -9,4 +9,7 @@ defmodule GithubTagger.User.Repository do
         language: language
       }),
       do: {id, name, description, url, language}
+
+  def from_raw({id, name, description, url, language}),
+    do: %__MODULE__{id: id, name: name, description: description, url: url, language: language}
 end
