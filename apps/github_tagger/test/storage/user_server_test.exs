@@ -4,12 +4,31 @@ defmodule GithubTagger.Storage.UserServerTest do
   alias GithubTagger.Storage.UserServer
   alias GithubTagger.User.Repository
 
-  describe "start_link/1" do
-    test "should start a server" do
-      name = :test_server
+  setup do
+    UserServer.clean()
+  end
 
-      assert {:ok, pid} = UserServer.start_link(name)
-      assert Process.info(pid, :registered_name) == {:registered_name, name}
+  test "supervisor and genserver are connected" do
+    {_, {message, _pid}} = UserServer.start_link()
+    assert message == :already_started
+  end
+
+  describe "clean/0" do
+    test "clean all repositories table" do
+      user = "daniel"
+
+      repo_one = %Repository{
+        id: 1,
+        name: "awesome_app",
+        description: "awesome_app repo",
+        url: "http://github/daniel/awesome_app",
+        language: "elixir"
+      }
+
+      UserServer.store({user, repo_one})
+
+      assert {:ok, []} == UserServer.clean()
+      assert {:ok, []} == UserServer.lookup(user)
     end
   end
 
@@ -33,13 +52,11 @@ defmodule GithubTagger.Storage.UserServerTest do
         language: "elixir"
       }
 
-      {:ok, pid} = UserServer.start_link()
-
       raw_repo =
         {1, "awesome_app", "awesome_app repo", "http://github/daniel/awesome_app", "elixir"}
 
-      assert {:ok, raw_repo} == UserServer.store({user, repo_one}, pid)
-      assert {:ok, _} = UserServer.store({user, repo_two}, pid)
+      assert {:ok, raw_repo} == UserServer.store({user, repo_one})
+      assert {:ok, _} = UserServer.store({user, repo_two})
     end
 
     test "return error when try add existing repository" do
@@ -54,9 +71,7 @@ defmodule GithubTagger.Storage.UserServerTest do
         language: "elixir"
       }
 
-      {:ok, pid} = UserServer.start_link()
-
-      UserServer.store({user, repo}, pid)
+      UserServer.store({user, repo})
       # assert {:error, "fail to insert repository"} = UserServer.store({user, repo}, pid)
     end
   end
@@ -81,9 +96,8 @@ defmodule GithubTagger.Storage.UserServerTest do
         language: "ruby"
       }
 
-      {:ok, pid} = UserServer.start_link()
-      UserServer.store({user, repo_one}, pid)
-      UserServer.store({user, repo_two}, pid)
+      UserServer.store({user, repo_one})
+      UserServer.store({user, repo_two})
 
       expected_repos = [Repository.to_raw(repo_two), Repository.to_raw(repo_one)]
       assert UserServer.lookup(user) == {:ok, expected_repos}

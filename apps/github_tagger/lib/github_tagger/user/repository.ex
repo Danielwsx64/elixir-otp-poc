@@ -12,4 +12,13 @@ defmodule GithubTagger.User.Repository do
 
   def from_raw({id, name, description, url, language}),
     do: %__MODULE__{id: id, name: name, description: description, url: url, language: language}
+
+  def sanitize(%{
+        "id" => id,
+        "name" => name,
+        "description" => description,
+        "html_url" => url,
+        "language" => language
+      }),
+      do: %__MODULE__{id: id, name: name, description: description, url: url, language: language}
 end

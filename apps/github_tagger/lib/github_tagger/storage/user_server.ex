@@ -4,23 +4,25 @@ defmodule GithubTagger.Storage.UserServer do
   alias GithubTagger.User.Repository
 
   # Client
-  def start_link(name \\ __MODULE__) do
-    GenServer.start_link(__MODULE__, %{}, name: name)
+  def start_link() do
+    GenServer.start_link(__MODULE__, %{}, name: __MODULE__)
   end
 
-  def store({user, %Repository{}} = data, name \\ __MODULE__) when is_bitstring(user) do
-    GenServer.call(name, [:store, data])
+  def clean do
+    GenServer.call(__MODULE__, :clean)
   end
 
-  def lookup(user, name \\ __MODULE__) when is_bitstring(user) do
-    GenServer.call(name, [:lookup, user])
+  def store({user, %Repository{}} = data) when is_bitstring(user) do
+    GenServer.call(__MODULE__, [:store, data])
+  end
+
+  def lookup(user) when is_bitstring(user) do
+    GenServer.call(__MODULE__, [:lookup, user])
   end
 
   # Server
   def init(_) do
-    table_pid = :ets.new(:user_repositories, [:private])
-
-    {:ok, {table_pid}}
+    {:ok, {create_table()}}
   end
 
   def handle_call([:store, {user, repo}], _from, {table}) do
@@ -34,6 +36,14 @@ defmodule GithubTagger.Storage.UserServer do
 
     {:reply, {:ok, repositories}, {table}}
   end
+
+  def handle_call(:clean, _from, {table}) do
+    :ets.delete(table)
+
+    {:reply, {:ok, []}, {create_table()}}
+  end
+
+  defp create_table, do: :ets.new(:user_repositories, [:private])
 
   defp ets_store({user, %Repository{} = repo}, table) do
     repo

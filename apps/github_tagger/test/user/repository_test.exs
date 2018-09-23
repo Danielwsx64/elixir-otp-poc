@@ -24,7 +24,7 @@ defmodule GithubTagger.User.RepositoryTest do
   end
 
   describe "from_raw/1" do
-    test "return raw repo data" do
+    test "return repository struct" do
       raw = {1, "app", "better app", "github.com", "elixir"}
 
       expected_repo = %Repository{
@@ -36,6 +36,30 @@ defmodule GithubTagger.User.RepositoryTest do
       }
 
       assert Repository.from_raw(raw) == expected_repo
+    end
+  end
+
+  describe "sanitize/1" do
+    test "return repository struct" do
+      input_repo = %{
+        "some_attr" => "some_value_1",
+        "id" => 1,
+        "name" => "app",
+        "description" => "better app",
+        "html_url" => "github.com",
+        "language" => "elixir",
+        "some_attr_2" => "some_value_2"
+      }
+
+      expected_repo = %Repository{
+        id: 1,
+        name: "app",
+        description: "better app",
+        url: "github.com",
+        language: "elixir"
+      }
+
+      assert Repository.sanitize(input_repo) == expected_repo
     end
   end
 end

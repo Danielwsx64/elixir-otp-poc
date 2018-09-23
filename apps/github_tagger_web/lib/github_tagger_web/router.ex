@@ -9,5 +9,6 @@ defmodule GithubTaggerWeb.Router do
     pipe_through(:api)
 
     get("/users/:user/repositories", RepositoriesController, :index)
+    post("/users/:user/repositories/fetch", RepositoriesController, :fetch)
   end
 end
