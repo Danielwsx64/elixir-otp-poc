@@ -22,10 +22,11 @@ defmodule GithubTagger.Storage.UserServerTest do
         name: "awesome_app",
         description: "awesome_app repo",
         url: "http://github/daniel/awesome_app",
-        language: "elixir"
+        language: "elixir",
+        tags: []
       }
 
-      UserServer.store({user, repo_one})
+      UserServer.store(user, repo_one)
 
       assert {:ok, []} == UserServer.clean()
       assert {:ok, []} == UserServer.lookup(user)
@@ -41,7 +42,8 @@ defmodule GithubTagger.Storage.UserServerTest do
         name: "awesome_app",
         description: "awesome_app repo",
         url: "http://github/daniel/awesome_app",
-        language: "elixir"
+        language: "elixir",
+        tags: []
       }
 
       repo_two = %Repository{
@@ -49,14 +51,12 @@ defmodule GithubTagger.Storage.UserServerTest do
         name: "awesome_app2",
         description: "awesome_app repo2",
         url: "http://github/daniel/awesome_app2",
-        language: "elixir"
+        language: "elixir",
+        tags: []
       }
 
-      raw_repo =
-        {1, "awesome_app", "awesome_app repo", "http://github/daniel/awesome_app", "elixir"}
-
-      assert {:ok, raw_repo} == UserServer.store({user, repo_one})
-      assert {:ok, _} = UserServer.store({user, repo_two})
+      assert {:ok, repo_one} == UserServer.store(user, repo_one)
+      assert {:ok, _} = UserServer.store(user, repo_two)
     end
 
     test "return error when try add existing repository" do
@@ -68,10 +68,11 @@ defmodule GithubTagger.Storage.UserServerTest do
         name: "awesome_app",
         description: "awesome_app repo",
         url: "http://github/daniel/awesome_app",
-        language: "elixir"
+        language: "elixir",
+        tags: []
       }
 
-      UserServer.store({user, repo})
+      UserServer.store(user, repo)
       # assert {:error, "fail to insert repository"} = UserServer.store({user, repo}, pid)
     end
   end
@@ -85,7 +86,8 @@ defmodule GithubTagger.Storage.UserServerTest do
         name: "awesome_app",
         description: "awesome_app repo",
         url: "http://github/daniel/awesome_app",
-        language: "elixir"
+        language: "elixir",
+        tags: []
       }
 
       repo_two = %Repository{
@@ -93,14 +95,69 @@ defmodule GithubTagger.Storage.UserServerTest do
         name: "another_awesome_app",
         description: "another_awesome_app repo",
         url: "http://github/daniel/another_awesome_app",
-        language: "ruby"
+        language: "ruby",
+        tags: []
       }
 
-      UserServer.store({user, repo_one})
-      UserServer.store({user, repo_two})
+      UserServer.store(user, repo_one)
+      UserServer.store(user, repo_two)
 
-      expected_repos = [Repository.to_raw(repo_two), Repository.to_raw(repo_one)]
+      expected_repos = [repo_one, repo_two]
       assert UserServer.lookup(user) == {:ok, expected_repos}
+    end
+  end
+
+  describe "lookup_repository/2" do
+    test "return correct repository" do
+      user = "daniel"
+
+      repo_one = %Repository{
+        id: 1,
+        name: "awesome_app",
+        description: "awesome_app repo",
+        url: "http://github/daniel/awesome_app",
+        language: "elixir",
+        tags: []
+      }
+
+      repo_two = %Repository{
+        id: 2,
+        name: "another_awesome_app",
+        description: "another_awesome_app repo",
+        url: "http://github/daniel/another_awesome_app",
+        language: "ruby",
+        tags: ["tag1", "tag2"]
+      }
+
+      UserServer.store(user, repo_one)
+      UserServer.store(user, repo_two)
+
+      assert UserServer.lookup_repository(user, repo_two.id) == {:ok, repo_two}
+    end
+  end
+
+  describe "update_repository/2" do
+    test "update the given repository" do
+      user = "daniel"
+
+      original_repository = %Repository{
+        id: 1,
+        name: "awesome_app",
+        description: "awesome_app repo",
+        url: "http://github/daniel/awesome_app",
+        language: "elixir",
+        tags: []
+      }
+
+      UserServer.store(user, original_repository)
+
+      updated_repository = Map.merge(original_repository, %{tags: ["tag1", "tag2"]})
+
+      assert {:ok, updated_repository} == UserServer.updated_repository(user, updated_repository)
+
+      expected_repositories = [updated_repository]
+
+      assert UserServer.lookup(user) == {:ok, expected_repositories}
     end
   end
 end

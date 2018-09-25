@@ -1,19 +1,42 @@
 defmodule GithubTagger.User.Repository do
-  defstruct [:id, :name, :description, :url, :language]
+  defstruct [:id, :name, :description, :url, :language, tags: []]
 
-  def to_raw(%__MODULE__{
+  def update_tags(%__MODULE__{} = repository, tags) when is_list(tags),
+    do: Map.merge(repository, %{tags: tags})
+
+  def to_tuple(%__MODULE__{
         id: id,
         name: name,
         description: description,
         url: url,
-        language: language
+        language: language,
+        tags: tags
       }),
-      do: {id, name, description, url, language}
+      do: {id, name, description, url, language, tags}
 
-  def from_raw({id, name, description, url, language}),
-    do: %__MODULE__{id: id, name: name, description: description, url: url, language: language}
+  def from_tuple({id, name, description, url, language, tags}),
+    do: %__MODULE__{
+      id: id,
+      name: name,
+      description: description,
+      url: url,
+      language: language,
+      tags: tags
+    }
 
-  def sanitize(%{
+  def from_list([]), do: []
+
+  def from_list([id, name, description, url, language, tags]),
+    do: %__MODULE__{
+      id: id,
+      name: name,
+      description: description,
+      url: url,
+      language: language,
+      tags: tags
+    }
+
+  def from_json(%{
         "id" => id,
         "name" => name,
         "description" => description,
