@@ -12,7 +12,7 @@ defmodule GithubTagger.User.Fetcher do
   end
 
   defp get_starred_repositories(user) do
-    get(user <> "/starred?sort=updated&direction=desc")
+    get(user <> "/starred")
   end
 
   defp extract_response({:ok, %{status: 200, body: response}}), do: response

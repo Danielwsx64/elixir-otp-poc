@@ -7,7 +7,7 @@ defmodule GithubTagger.User.FetcherTest do
     test "get user starred repositories" do
       user = "danielwsx64"
 
-      repositories = ["laravel-docker-image", "ws_dotfiles"]
+      repositories = ["ws_dotfiles", "laravel-docker-image"]
       result = Fetcher.starred_repositories(user) |> Enum.map(& &1["name"])
       assert result == repositories
     end
