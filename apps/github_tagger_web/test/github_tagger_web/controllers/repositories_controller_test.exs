@@ -133,7 +133,7 @@ defmodule GithubTaggerWeb.RepositoriesControllerTest do
         |> put_req_header("content-type", "application/json")
         |> patch(
           repositories_path(conn, :update, user, struct_repo.id),
-          Poison.encode!(%{tags: tags})
+          Poison.encode!(%{repository: %{tags: tags}})
         )
 
       assert response.status == 204

@@ -23,14 +23,14 @@ defmodule GithubTaggerWeb.RepositoriesController do
     json(conn, storaged_repositories)
   end
 
-  def update(conn, %{"user" => user, "id" => id, "tags" => tags} = tt) do
+  def update(conn, %{"user" => user, "id" => id, "repository" => %{"tags" => tags}} = tt) do
     id
     |> to_integer()
     |> find_repository(user)
     |> update_repository_tags(tags)
     |> ets_update_repository(user)
     |> case do
-      {:ok, _} -> put_status(conn, :no_content)
+      {:ok, _} -> send_resp(conn, :no_content, "")
       {:error, "repository not found"} -> put_status(conn, :not_found)
     end
   end
